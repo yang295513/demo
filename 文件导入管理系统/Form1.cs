@@ -34,26 +34,22 @@ namespace 文件导入管理系统
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            readDate();
             textBoxfg.Text = "--";
-            listView1.Columns.Add("文件名", 200);
+            listView1.Columns.Add("文件名", 100);
             listView1.Columns.Add("导入时间", 200);
             listView1.Columns.Add("冲突条数", 130);
             listView1.Columns.Add("冲突时间", 200);
-            
-
-
+            readDate();
         }
         public void read(string path,string fileName)//读取到数据库
         {
             if (File.Exists(path) == true)
             {
+                this.Text = "正在读取文件";
                 StreamReader sr = new StreamReader(path, Encoding.Default);
                 string item;
                 ListViewItem itemview = new ListViewItem(fileName);
                 itemview.SubItems.Add(DateTime.Now.ToString());
-                itemview.SubItems.Add(DateTime.Now.ToString());
-
 
                 List<stript> da = new List<stript>();
                 DateTime time = DateTime.Now;
@@ -88,7 +84,9 @@ namespace 文件导入管理系统
                     itemview.SubItems.Add(da.Count().ToString());
                     itemview.SubItems.Add(time.ToString());
 
-                    string fileName1 = "重复/" + DateTime.Now.ToString() + "/" + "和这一天" + time.ToString() + "的" + name + "文件冲突了" + da.Count() + "个.txt";
+                    string fileName1 = "重复\\" + DateTime.Now.ToString("MM月dd日 HH时mm分ss秒ff") + "和这一天" + time.ToString("yyyyMMddHHmmssff") + "的" + name + "文件冲突了" + da.Count() + "个.txt";
+                    toolStrip1.Text = fileName1;
+                    Console.WriteLine(fileName1);
                     StreamWriter sw = new StreamWriter(fileName1, false, Encoding.Default);
                     foreach (var i in da)
                     {
@@ -101,6 +99,7 @@ namespace 文件导入管理系统
                     itemview.SubItems.Add("0");
                     itemview.SubItems.Add("无");
                 }
+                listView1.Items.Add(itemview);
                 sr.Close();
             }
             else
@@ -111,10 +110,10 @@ namespace 文件导入管理系统
 
         public void readDate()//读取数据库以及读取列表
         {
-            if (File.Exists("date/date.txt") == true)
+            if (File.Exists("data.txt") == true)
             {
-                StreamReader sr = new StreamReader("date/date.txt", Encoding.Default);
-                StreamReader srlist = new StreamReader("date/list.txt", Encoding.Default);
+                StreamReader sr = new StreamReader("data.txt", Encoding.Default);
+                StreamReader srlist = new StreamReader("list.txt", Encoding.Default);
                 int flag = 0;
                 string item;
                 while((item=sr.ReadLine())!=null)
@@ -131,7 +130,8 @@ namespace 文件导入管理系统
                     }
                 }
                 sr.Close();
-                if(flag==1)
+                srlist.Close();
+                if (flag==1)
                 {
                     MessageBox.Show("数据库格式不合法");
                     flag = 0;
@@ -148,6 +148,7 @@ namespace 文件导入管理系统
                             items.SubItems.Add(sArray[1]);
                             items.SubItems.Add(sArray[2]);
                             items.SubItems.Add(sArray[3]);
+                            listView1.Items.Add(items);
                         }
                         else
                         {
@@ -163,19 +164,20 @@ namespace 文件导入管理系统
             }
             else
             {
-                File.Create("date/date.txt");
-                if(File.Exists("date/list.txt") ==false)
+                File.Create("data.txt");
+                if(File.Exists("list.txt") ==false)
                 {
-                    File.Create("date/list.txt");
+                    File.Create("list.txt");
                 }
             }
         }
 
         public void writeDate()//数据库写出以及写出列表
         {
-            StreamWriter sw = new StreamWriter("date/date.txt", false, Encoding.Default);
-            StreamWriter sw1 = new StreamWriter("date/date1.txt", false, Encoding.Default);
-            StreamWriter swlist = new StreamWriter("date/list.txt", false, Encoding.Default);
+           
+            StreamWriter sw = new StreamWriter("data.txt", false, Encoding.Default);
+            StreamWriter sw1 = new StreamWriter("data1.txt", false, Encoding.Default);
+            StreamWriter swlist = new StreamWriter("list.txt", false, Encoding.Default);
 
             foreach(var i in data)
             {
@@ -188,16 +190,22 @@ namespace 文件导入管理系统
             }
             for(int i=0;i<listView1.Items.Count;i++)
             {
-                swlist.WriteLine(listView1.Items[i].SubItems[0] + "--" + listView1.Items[i].SubItems[1] + "--" + listView1.Items[i].SubItems[2] + "--" + listView1.Items[i].SubItems[3]);
+                swlist.WriteLine(listView1.Items[i].SubItems[0].Text + "--" + listView1.Items[i].SubItems[1].Text + "--" + listView1.Items[i].SubItems[2].Text + "--" + listView1.Items[i].SubItems[3].Text);
+                //Console.WriteLine(listView1.Items[i].SubItems[0] + "--" + listView1.Items[i].SubItems[1] + "--" + listView1.Items[i].SubItems[2] + "--" + listView1.Items[i].SubItems[3]);
             }
-           
+
+            sw.Flush();
+            sw1.Flush();
+            swlist.Flush();
+
             sw.Close();
             sw1.Close();
-            sw.Close();
+            swlist.Close();
        }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
+            //this.Text = System.Windows.Forms.Application.ExecutablePath;
             writeDate();
         }
     }
